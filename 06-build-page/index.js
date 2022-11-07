@@ -13,7 +13,7 @@ const folderAssets = path.resolve(__dirname, 'assets');
   await copyHTML();
   await changeDistHtml();
   await createBundle();
-  await copyAssets();
+  await copyAssets(folderAssets);
 })()
 
 async function createDistFolder() {
@@ -65,15 +65,14 @@ async function createBundle() {
   }
 }
 
-async function copyAssets() {
-  const files = await fsPromise.readdir(folderAssets, {withFileTypes: true});
+async function copyAssets(folderAssets) {
+  let files = await fsPromise.readdir(folderAssets, { withFileTypes: true });
   for (const file of files) {
-    if(file.isDirectory()) {
-      await fsPromise.mkdir(path.join(folderDist, 'assets', file.name), { recursive: true });
-      const innerFiles = await fsPromise.readdir(path.join(folderAssets, file.name));
-      for (const innerFile of innerFiles) {
-        await fsPromise.copyFile(path.join(folderAssets, file.name, innerFile), path.join(folderDist, 'assets', file.name, innerFile));
-      }
+    if (file.isDirectory()) {
+      await fsPromise.mkdir(path.join(folderAssets.replace('assets', 'project-dist/assets'), file.name), { recursive: true })
+      await copyAssets(path.join(folderAssets, file.name));
+    } else {
+      await fsPromise.copyFile(path.join(folderAssets, file.name), path.join(folderAssets.replace('assets', 'project-dist/assets'), file.name));
     }
   }
 }
