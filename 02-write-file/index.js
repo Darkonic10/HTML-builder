@@ -1,22 +1,24 @@
 const path = require('path')
 const fs = require('fs');
-const { stdin, stdout, exit, SIGINT } = process;
+const os = require('os');
+const { stdin, stdout, exit } = process;
 
-fs.writeFile(path.resolve(__dirname, 'text-file.txt'), '', err => {
-  if(err) return;
+const EOL = os.EOL
+const filePath = path.resolve(__dirname, 'text-file.txt')
+
+fs.writeFile(filePath, '', err => {
+  if (err) throw err;
 });
 
 stdout.write('Hello, input your text for write in file: ')
 stdin.on('data', data => {
   const dataStringify = data.toString().trim();
   if(dataStringify === 'exit') exit();
-  fs.appendFile(path.resolve(__dirname, 'text-file.txt'), `${dataStringify}\n`, err => {
-      if (err) return;
+  fs.appendFile(filePath, `${dataStringify}${EOL}`, err => {
+      if (err) throw err;
     }
   );
 })
 
-process.on('exit', () => stdout.write('\nGood bye!'));
-process.on('SIGINT', () => {
-  exit();
-});
+process.on('SIGINT', () => exit());
+process.on('exit', () => stdout.write(`${EOL}Good bye!`));
